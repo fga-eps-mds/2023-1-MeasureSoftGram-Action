@@ -1,5 +1,7 @@
+import { AxiosResponse } from "axios";
 import { ResponseListOrganizations, ResponseListProducts, ResponseListReleases, ResponseListRepositories } from "../../src/service/request-service";
 import { MetricsResponseAPI } from "../../src/sonarqube";
+import { MSGConfig } from "../../src/indicators_i";
 
 export const bodyCalculateCharacteristicsResponse = [
   {
@@ -278,3 +280,150 @@ export const bodyListReleaseResponse: ResponseListReleases[] = [
       "end_at": "2023-06-26T00:00:00-03:00"
   }
 ]
+
+export const bodyCurrentConfigsResponse: MSGConfig = {
+    "id": 8,
+    "name": "MeasureSoftGram",
+    "data": {
+        "characteristics": [
+            {
+                "key": "reliability",
+                "weight": 49,
+                "subcharacteristics": [
+                    {
+                        "key": "testing_status",
+                        "weight": 100,
+                        "measures": [
+                            {
+                                "key": "passed_tests",
+                                "weight": 69
+                            },
+                            {
+                                "key": "test_builds",
+                                "weight": 31
+                            },
+                            {
+                                "key": "test_coverage",
+                                "weight": 0
+                            }
+                        ]
+                    }
+                ]
+            },
+            {
+                "key": "maintainability",
+                "weight": 51,
+                "subcharacteristics": [
+                    {
+                        "key": "modifiability",
+                        "weight": 100,
+                        "measures": [
+                            {
+                                "key": "non_complex_file_density",
+                                "weight": 56
+                            },
+                            {
+                                "key": "commented_file_density",
+                                "weight": 43
+                            },
+                            {
+                                "key": "duplication_absense",
+                                "weight": 1
+                            }
+                        ]
+                    }
+                ]
+            }
+        ]
+    },
+    "created_at": "2023-06-05T20:55:03.891360-03:00",
+    "created_config": true
+}
+
+export const axiosGetProductActionsResponse = {
+    data: {
+        "id": 3,
+        "url": "http://measuresoft.herokuapp.com/api/v1/organizations/1/products/3/",
+        "name": "MeasureSoftGram",
+        "key": "fga-eps-mds-measuresoftgram",
+        "organization": "http://measuresoft.herokuapp.com/api/v1/organizations/1/",
+        "description": null,
+        "repositories": [
+            "http://measuresoft.herokuapp.com/api/v1/organizations/1/products/3/repositories/12/",
+            "http://measuresoft.herokuapp.com/api/v1/organizations/1/products/3/repositories/13/",
+            "http://measuresoft.herokuapp.com/api/v1/organizations/1/products/3/repositories/20/"
+        ],
+        "actions": {
+            "create a new repository": "http://measuresoft.herokuapp.com/api/v1/organizations/1/products/3/repositories/",
+            "get current goal": "http://measuresoft.herokuapp.com/api/v1/organizations/1/products/3/current/goal/",
+            "get compare all goals": "http://measuresoft.herokuapp.com/api/v1/organizations/1/products/3/all/goal/",
+            "get current pre-config": "http://measuresoft.herokuapp.com/api/v1/organizations/1/products/3/current/pre-config/",
+            "get pre-config entity relationship tree": "http://measuresoft.herokuapp.com/api/v1/organizations/1/products/3/entity-relationship-tree/",
+            "get all repositories latest sqcs": "http://measuresoft.herokuapp.com/api/v1/organizations/1/products/3/repositories-sqc-latest-values/",
+            "get all repositories sqc historical values": "http://measuresoft.herokuapp.com/api/v1/organizations/1/products/3/repositories-sqc-historical-values/",
+            "create a new goal": "http://measuresoft.herokuapp.com/api/v1/organizations/1/products/3/create/goal/",
+            "create a new pre-config": "http://measuresoft.herokuapp.com/api/v1/organizations/1/products/3/create/pre-config/"
+        }
+    }
+} 
+
+export const axiosGetCurrentConfigResponse = {
+    data: {
+        "id": 8,
+        "name": "MeasureSoftGram",
+        "data": {
+            "characteristics": [
+                {
+                    "key": "reliability",
+                    "weight": 49,
+                    "subcharacteristics": [
+                        {
+                            "key": "testing_status",
+                            "weight": 100,
+                            "measures": [
+                                {
+                                    "key": "passed_tests",
+                                    "weight": 69
+                                },
+                                {
+                                    "key": "test_builds",
+                                    "weight": 31
+                                },
+                                {
+                                    "key": "test_coverage",
+                                    "weight": 0
+                                }
+                            ]
+                        }
+                    ]
+                },
+                {
+                    "key": "maintainability",
+                    "weight": 51,
+                    "subcharacteristics": [
+                        {
+                            "key": "modifiability",
+                            "weight": 100,
+                            "measures": [
+                                {
+                                    "key": "non_complex_file_density",
+                                    "weight": 56
+                                },
+                                {
+                                    "key": "commented_file_density",
+                                    "weight": 43
+                                },
+                                {
+                                    "key": "duplication_absense",
+                                    "weight": 1
+                                }
+                            ]
+                        }
+                    ]
+                }
+            ]
+        },
+        "created_at": "2023-06-05T20:55:03.891360-03:00",
+        "created_config": true
+    }
+} as AxiosResponse<MSGConfig>

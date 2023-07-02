@@ -1,4 +1,11 @@
 import axios, { AxiosRequestConfig, AxiosResponse, AxiosError } from "axios";
+import { MSGBaseUris } from "../utils";
+import { MSGConfig } from "../indicators_i";
+import createMSGJson from '../handleFiles';
+import Binaries from '../msgbinaries';
+
+const INSUFFICIENT_ERROR = 'Insufficient arguments provided to find object of calculation.';
+
 
 export interface Organization {
     id: number;
@@ -10,6 +17,7 @@ export interface Organization {
     actions: unknown;
 }
 
+
 export interface Product {
     id: number;
     url: string;
@@ -18,8 +26,9 @@ export interface Product {
     organization: string;
     description: string;
     repositories: Array<string>;
-    actions: unknown;
+    actions: {[key: string]: string| number};
 }
+
 
 export interface Repository {
     id: number;
@@ -33,6 +42,7 @@ export interface Repository {
     actions: unknown;
 }
 
+
 export interface ResponseListRepositories {
     count: number;
     next: string | null;
@@ -40,12 +50,14 @@ export interface ResponseListRepositories {
     results: Array<Repository>;
 }
 
+
 export interface ResponseListProducts {
     count: number;
     next: string | null;
     previous: string | null;
     results: Array<Product>;
 }
+
 
 export interface ResponseListReleases {
     id: number;
@@ -56,12 +68,14 @@ export interface ResponseListReleases {
 }
 
 
+
 export interface ResponseListOrganizations {
     count: number;
     next: string | null;
     previous: string | null;
     results: Array<Organization>;
 }
+
 
 export interface ResponseCalculateCharacteristics {
     id: number;
@@ -76,6 +90,7 @@ export interface ResponseCalculateCharacteristics {
     }
 }
 
+
 export interface ResponseCalculateSubcharacteristics {
     id: number;
     key: string;
@@ -88,6 +103,7 @@ export interface ResponseCalculateSubcharacteristics {
         subcharacteristic_id: number;
     }
 }
+
 
 export interface ResponseCalculateMeasures {
     id: number;
@@ -108,22 +124,35 @@ export interface ResponseCalculateTSQMI {
     created_at: string;
 }
 
+
+export interface MSGBaseInfo {
+    orgId?: number;
+    productId?: number;
+    repoId?: number;
+    releaseId?: number;
+}
+
+
 export class RequestService {
     private MSGRAM_SERVICE_HOST = 'https://measuresoft.herokuapp.com';
     private MSG_TOKEN = "'secret';"
     private baseUrl = `${this.MSGRAM_SERVICE_HOST}/api/v1/`;
 
+
     public getBaseUrl(): string {
         return this.baseUrl;
     }
 
+
     public getMsgToken(): string {
         return this.MSG_TOKEN;
     }
+
     
     public setMsgToken(token: string): void {
         this.MSG_TOKEN = token;
     }
+
 
     private async makeRequest(method: 'get' | 'post', url: string, data: object = {}): Promise<AxiosResponse | null> {
         const config: AxiosRequestConfig = {
@@ -147,6 +176,7 @@ export class RequestService {
             if (axios.isAxiosError(error)) {
                 const axiosError = error as AxiosError;
                 console.error(`Failed to ${method} data to the API. ${axiosError.message}`);
+                console.error(axiosError);
             } else {
                 console.error('An unexpected error occurred.');
             }
@@ -184,22 +214,27 @@ export class RequestService {
         return response?.data;
     }
     
+    public async insertMetrics({ orgId , productId , repoId }: MSGBaseInfo, metrics?: string): Promise<undefined> {
+        if (!(orgId && productId && repoId) || !metrics) return Promise.reject(INSUFFICIENT_ERROR);
 
-    public async insertMetrics(metrics: string, orgId: number, productId: number, repoId: number): Promise<undefined> {
         const url = `${this.baseUrl}organizations/${orgId}/products/${productId}/repositories/${repoId}/collectors/sonarqube/`;
         const jsonData = JSON.parse(metrics);
         const response = await this.makeRequest('post', url, jsonData);
         return response?.data;
     }
 
-    public async calculateMeasures(orgId: number, productId: number, repoId: number): Promise<ResponseCalculateMeasures[]> {
+    public async calculateMeasures({orgId, productId, repoId }: MSGBaseInfo): Promise<ResponseCalculateMeasures[]> {
+        if (!(orgId && productId && repoId)) return Promise.reject(INSUFFICIENT_ERROR);
+
         const url = `${this.baseUrl}organizations/${orgId}/products/${productId}/repositories/${repoId}/calculate/measures/`;
         const data = { measures: [ { key: "passed_tests" }, { key: "test_builds" }, { key: "test_coverage" }, { key: "non_complex_file_density" }, { key: "commented_file_density" }, { key: "duplication_absense" } ] };
         const response = await this.makeRequest('post', url, data);
         return response?.data;
     }
 
-    public async calculateCharacteristics(orgId: number, productId: number, repoId: number): Promise<ResponseCalculateCharacteristics[]> {
+    public async calculateCharacteristics({orgId, productId, repoId}: MSGBaseInfo): Promise<ResponseCalculateCharacteristics[]> {
+        if (!(orgId && productId && repoId)) return Promise.reject(INSUFFICIENT_ERROR);
+
         const url = `${this.baseUrl}organizations/${orgId}/products/${productId}/repositories/${repoId}/calculate/characteristics/`;
         const data = { characteristics: [ { key: "reliability" }, { key: "maintainability" } ] };
         const response = await this.makeRequest('post', url, data);
@@ -207,7 +242,9 @@ export class RequestService {
     }
     
 
-    public async calculateSubCharacteristics(orgId: number, productId: number, repoId: number): Promise<ResponseCalculateSubcharacteristics[]> {
+    public async calculateSubCharacteristics({orgId, productId, repoId}: MSGBaseInfo): Promise<ResponseCalculateSubcharacteristics[]> {
+        if (!(orgId && productId && repoId)) return Promise.reject(INSUFFICIENT_ERROR);
+
         const url = `${this.baseUrl}organizations/${orgId}/products/${productId}/repositories/${repoId}/calculate/subcharacteristics/`;
         const data = { subcharacteristics: [ { key: "modifiability" }, { key: "testing_status" } ] };
         const response = await this.makeRequest('post', url, data);
@@ -215,8 +252,10 @@ export class RequestService {
     }
     
 
-    public async calculateTSQMI(orgId: number, productId: number, repoId: number): Promise<ResponseCalculateTSQMI> {
+    public async calculateTSQMI({orgId, productId, repoId}: MSGBaseInfo): Promise<ResponseCalculateTSQMI> {
         const url = `${this.baseUrl}organizations/${orgId}/products/${productId}/repositories/${repoId}/calculate/tsqmi/`;
+        if (!(orgId && productId && repoId)) return Promise.reject(INSUFFICIENT_ERROR);
+
         const response = await this.makeRequest('post', url);
         return response?.data;
     }

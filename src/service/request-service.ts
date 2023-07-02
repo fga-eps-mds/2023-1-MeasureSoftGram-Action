@@ -220,4 +220,44 @@ export class RequestService {
         const response = await this.makeRequest('post', url);
         return response?.data;
     }
+
+
+    public async getCurrentConfigs({ orgId, productId }: MSGBaseInfo)
+            : Promise<MSGConfig> {
+
+        if (!(orgId && productId)) return Promise.reject(INSUFFICIENT_ERROR);
+
+        const url = MSGBaseUris.getProductDetail(orgId, productId);
+        console.debug(`Built Uri: ${url}`);
+        let resp = await this.makeRequest('get', url);
+
+        const { data }: AxiosResponse<Product> = resp as AxiosResponse<Product>;
+        const actions = data?.actions
+
+        const currentConfigUri: string = actions && actions['get current pre-config'] ?
+                actions['get current pre-config'] as string : ''
+
+        if (currentConfigUri === '') return Promise.reject(
+            `Error. It wasn't possible to get products actions urls. Check if you generated a release.`);
+
+        let pre_config: AxiosResponse<MSGConfig> = await this.makeRequest(
+                'get', currentConfigUri) as AxiosResponse<MSGConfig>;
+
+        if (!pre_config?.data.created_config) return Promise.reject(
+            `Error: The user didn't created a release configuration. 
+Please go to your MeasureSoftgram account and create one for this product.`);
+
+        return pre_config?.data;
+    }
 }
+
+
+export class MSGCalc {
+    public static async calculate(msgInfo: MSGBaseInfo, msgCalcRequest: (msgInfo: MSGBaseInfo, postArgs?: string) => Promise<any>, postArgs?: string) : Promise<any> {
+        const configs = await (new RequestService().getCurrentConfigs(msgInfo));
+        createMSGJson(configs);
+        Binaries.calculate();
+        return msgCalcRequest(msgInfo, postArgs);
+    }
+}
+

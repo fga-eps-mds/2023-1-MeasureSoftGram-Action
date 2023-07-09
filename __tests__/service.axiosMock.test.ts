@@ -47,8 +47,7 @@ describe('Configurations service', () => {
             .catch((e: PromiseRejectedResult) => {
                 expect(mockedAxios).toHaveBeenCalled();
                 expect(e)
-                    .toEqual(`Error: The user didn't created a release configuration. 
-    Please go to your MeasureSoftgram account and create one for this product.`);
+                    .toEqual(`Error: The user didn't created a release configuration. Please go to your MeasureSoftgram account and create one for this product.`);
             });
     });
 });

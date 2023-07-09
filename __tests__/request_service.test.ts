@@ -152,7 +152,7 @@ describe('RequestService', () => {
     mockAxios.onPost(`${service.getBaseUrl()}organizations/${orgId}/products/${productId}/repositories/${repoId}/calculate/tsqmi/`)
       .reply(200, bodyCalculateTSQMIResponse);
 
-    const response = await service.calculateTSQMI(orgId, productId, repoId);
+    const response = await service.calculateTSQMI({orgId, productId, repoId});
 
     expect(mockAxios.history.post.length).toBe(1);
     expect(mockAxios.history.post[0].data).toBeDefined();

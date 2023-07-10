@@ -3,10 +3,8 @@ export interface DefaultAttr {
     weight: number;
 }
 
-export interface Measure extends DefaultAttr {}
-
 export interface Subcharacteristic extends DefaultAttr {
-    measures: Array<Measure>
+    measures: Array<DefaultAttr>
 }
 
 export interface Characteristic extends DefaultAttr {

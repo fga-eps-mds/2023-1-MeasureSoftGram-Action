@@ -307,7 +307,7 @@ export class RequestService {
 
         const url = MSGBaseUris.getProductDetail(orgId, productId);
         console.debug(`Built Uri: ${url}`);
-        let resp = await this.makeRequest('get', url);
+        const resp = await this.makeRequest('get', url);
 
         const { data }: AxiosResponse<Product> = resp as AxiosResponse<Product>;
         const actions = data?.actions;
@@ -322,7 +322,7 @@ export class RequestService {
                 `Error. It wasn't possible to get products actions urls. Check if you generated a release.`
             );
 
-        let pre_config: AxiosResponse<MSGConfig> = (await this.makeRequest(
+        const pre_config: AxiosResponse<MSGConfig> = (await this.makeRequest(
             'get',
             currentConfigUri
         )) as AxiosResponse<MSGConfig>;

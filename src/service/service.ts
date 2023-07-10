@@ -1,4 +1,4 @@
-import { Organization, Product, Repository, RequestService, ResponseCalculateCharacteristics, ResponseListReleases } from "./request-service";
+import { MSGCalc, Organization, Product, Repository, RequestService, ResponseCalculateCharacteristics, ResponseListReleases } from "./request-service";
 import { MetricsResponseAPI } from '../sonarqube';
 
 export interface CalculatedMsgram {
@@ -73,17 +73,32 @@ export default class Service {
         const string_metrics = JSON.stringify(metrics);
         console.log('Calculating metrics, measures, characteristics and subcharacteristics');
 
-        await requestService.insertMetrics(string_metrics, orgId, productId, repositoryId);
-        const data_measures = await requestService.calculateMeasures(orgId, productId, repositoryId);
+        await MSGCalc.calculate(
+            { orgId, productId, repoId: repositoryId }, 
+            requestService.insertMetrics, 
+            string_metrics);
+
+        const data_measures = await MSGCalc.calculate(
+            { orgId, productId, repoId: repositoryId }, 
+            requestService.calculateMeasures);
+
         console.log('Calculated measures: \n', data_measures);
 
-        const data_characteristics = await requestService.calculateCharacteristics(orgId, productId, repositoryId);
+        const data_characteristics = await MSGCalc.calculate(
+            { orgId, productId, repoId: repositoryId }, 
+            requestService.calculateCharacteristics);
         console.log('Calculated characteristics: \n', data_characteristics);
 
-        const data_subcharacteristics = await requestService.calculateSubCharacteristics(orgId, productId, repositoryId);
+        const data_subcharacteristics = await MSGCalc.calculate(
+            { orgId, productId, repoId: repositoryId }, 
+            requestService.calculateSubCharacteristics);
+
         console.log('Calculated subcharacteristics: \n', data_subcharacteristics);
 
-        const data_tsqmi = await requestService.calculateTSQMI(orgId, productId, repositoryId);
+        const data_tsqmi = await MSGCalc.calculate(
+            { orgId, productId, repoId: repositoryId }, 
+            requestService.calculateTSQMI);
+
         console.log('TSQMI: \n', data_tsqmi);
 
         return { data_characteristics, data_tsqmi };
